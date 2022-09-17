@@ -58,7 +58,7 @@ func (app *Config) serve() {
 		Handler: app.routes(),
 	}
 
-	app.InfoLog.Println("Starting web server...")
+	app.InfoLog.Println("Starting web server on port:", PORT)
 	err := srv.ListenAndServe()
 	if err != nil {
 		log.Panic(err)
