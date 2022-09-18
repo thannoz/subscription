@@ -6,7 +6,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
 	"sync"
+	"syscall"
 	"time"
 
 	"github.com/alexedwards/scs/redisstore"
@@ -22,7 +24,6 @@ const PORT = "8090"
 func main() {
 	// connect to the database
 	db := initDB()
-	db.Ping()
 
 	// create sessions
 	session := initSession()
@@ -42,10 +43,13 @@ func main() {
 		DB:       db,
 		InfoLog:  infoLog,
 		ErrorLog: errorLog,
-		Wait:     &wg,
+		Wg:       &wg,
 	}
 
 	// set up mail
+
+	// listen for signals
+	go app.listenForShutDown()
 
 	// listen for web connections
 	app.serve()
@@ -86,7 +90,7 @@ func connectToDB() *sql.DB {
 			return conn
 		}
 
-		if counts > 10 {
+		if counts > 2 {
 			return nil
 		}
 
@@ -130,4 +134,21 @@ func initRedis() *redis.Pool {
 	}
 
 	return redisPool
+}
+
+// listenForShutDown stop our app gracefully
+func (app *Config) listenForShutDown() {
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT|syscall.SIGTERM)
+	<-quit
+	app.shutdown()
+	os.Exit(0)
+}
+
+func (app *Config) shutdown() {
+	app.InfoLog.Println("would run cleanup tasks...")
+
+	// block until waitgroup is empty
+	app.Wg.Wait()
+	app.InfoLog.Println("closing channels and shutting down application...")
 }

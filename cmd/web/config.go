@@ -13,5 +13,5 @@ type Config struct {
 	DB       *sql.DB
 	InfoLog  *log.Logger
 	ErrorLog *log.Logger
-	Wait     *sync.WaitGroup
+	Wg       *sync.WaitGroup
 }
