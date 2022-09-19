@@ -2,11 +2,13 @@ package main
 
 import (
 	"database/sql"
+	"encoding/gob"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
+	"subscription/data"
 	"sync"
 	"syscall"
 	"time"
@@ -44,6 +46,7 @@ func main() {
 		InfoLog:  infoLog,
 		ErrorLog: errorLog,
 		Wg:       &wg,
+		Models:   data.New(db),
 	}
 
 	// set up mail
@@ -115,12 +118,19 @@ func openDB(dsn string) (*sql.DB, error) {
 }
 
 func initSession() *scs.SessionManager {
+	// user type to store in the session
+	gob.Register(data.User{})
+
 	session := scs.New()
 	session.Store = redisstore.New(initRedis())
 	session.Lifetime = 24 * time.Hour
 	session.Cookie.Persist = true
 	session.Cookie.SameSite = http.SameSiteLaxMode
 	session.Cookie.Secure = true
+
+	// userID, _, _ := session.Store.Find("user_ID")
+
+	// fmt.Println("In Session:", userID)
 
 	return session
 }
