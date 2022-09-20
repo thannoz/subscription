@@ -45,7 +45,7 @@ func (app *Config) PostLoginPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// log user in
-	app.Session.Put(r.Context(), "user_ID", user.ID)
+	app.Session.Put(r.Context(), "userID", user.ID)
 	app.Session.Put(r.Context(), "user", user)
 
 	app.Session.Put(r.Context(), "flash", "Seccessful login")
@@ -67,9 +67,19 @@ func (app *Config) RegisterPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *Config) PostRegisterPage(w http.ResponseWriter, r *http.Request) {
+	// create a user
 
+	// send an activation email
+
+	// subscribe the user to an account
 }
 
 func (app *Config) ActivateAccount(w http.ResponseWriter, r *http.Request) {
+	// validate url
 
+	// generate an invoice
+
+	// send an email with attachments
+
+	// send an email the invoice attached
 }
