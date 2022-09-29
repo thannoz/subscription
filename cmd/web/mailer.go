@@ -20,7 +20,7 @@ type Mail struct {
 	Encryption  string
 	FromAddress string
 	FromName    string
-	wg          *sync.WaitGroup
+	Wg          *sync.WaitGroup
 	MailerChan  chan Message
 	ErrorChan   chan error
 	DoneChan    chan bool
@@ -37,8 +37,24 @@ type Message struct {
 	Template    string
 }
 
-// A function to listen for message on the MailerChan
+// listenForMail listens for mails
+func (app *Config) listenForMail() {
+	for {
+		select {
+		case msg := <-app.Mailer.MailerChan:
+			go app.Mailer.sendMail(msg, app.Mailer.ErrorChan)
+		case err := <-app.Mailer.ErrorChan:
+			app.ErrorLog.Println(err)
+		case <-app.Mailer.DoneChan:
+			return
+		}
+	}
+}
+
+// sendMail listens for message on the MailerChan
 func (m *Mail) sendMail(msg Message, errorChan chan error) {
+	defer m.Wg.Done()
+
 	if msg.Template == "" {
 		msg.Template = "mail"
 	}
