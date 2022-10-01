@@ -11,6 +11,7 @@ import (
 	mail "github.com/xhit/go-simple-mail/v2"
 )
 
+// Mail describe the mail server
 type Mail struct {
 	Domain      string
 	Host        string
@@ -26,6 +27,7 @@ type Mail struct {
 	DoneChan    chan bool
 }
 
+// Message describe the type of the message
 type Message struct {
 	From        string
 	FromName    string
